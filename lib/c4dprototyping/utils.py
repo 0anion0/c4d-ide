@@ -57,3 +57,6 @@ def get_last_traceback():
 
     return tb
 
+def xor(a, b):
+    return bool(a) ^ bool(b)
+

@@ -24,6 +24,7 @@ import time
 
 from weakref import ref
 from c4dprototyping import res, undotree, utils
+from c4dprototyping.utils import xor
 
 class ScriptEditor(c4d.gui.GeDialog):
     r""" This class implements a Script Editor which can be used
@@ -94,6 +95,8 @@ class ScriptEditor(c4d.gui.GeDialog):
         super(ScriptEditor, self).__init__()
 
         self.__script = None
+        self.__traceback_data = (None, None)
+        self.__traceback_visible = False
 
         self.title = title or res['IDC_SCRIPT_EDITOR']
         self.options = {
@@ -174,17 +177,25 @@ class ScriptEditor(c4d.gui.GeDialog):
         if hasattr(self, 'SetMultiLinePos'):
             self.SetMultiLinePos(res.TEXT_SCRIPT, line, column)
 
-    def DisplayTraceback(self, exc, traceback):
+    def DisplayTraceback(self, exc=None, traceback=None):
         r""" Display a the traceback below the text field in the
         editor. """
 
+        if xor(exc, traceback):
+            raise ValueError('require exc and traceback or neither of them')
+
+        if not exc and not traceback:
+            exc, traceback = self.__traceback_data
+
+        self.MenuInitString(res.MENU_VIEW_TRACEBACK, True, True)
         self.LayoutFlushGroup(res.GROUP_TRACEBACK)
-        self.HideElement(res.GROUP_TRACEBACK, False)
         self.LayoutCallback(self.TRACEBACKGROUP_START, (exc, traceback))
 
         # Add a close button to the top right.
         self.GroupBegin(0, c4d.BFH_SCALEFIT, 0, 0)
         self.GroupBorderSpace(4, 0, 4, 0)
+
+        message = str(exc) if exc else res['IDC_NO_TRACEBACK']
         self.AddStaticText(0, c4d.BFH_SCALEFIT, name=str(exc))
         self.AddBitmapButton(
                     res.BUTTON_CLOSE_TRACEBACK, 0,
@@ -205,12 +216,26 @@ class ScriptEditor(c4d.gui.GeDialog):
         self.LayoutCallback(self.TRACEBACKGROUP_END, (exc, traceback))
         self.LayoutChanged(res.GROUP_TRACEBACK)
 
+        self.__traceback_data = (exc, traceback)
+        self.__traceback_visible = True
+
     def HideTraceback(self):
         r""" Hide the Traceback view. """
 
         self.LayoutFlushGroup(res.GROUP_TRACEBACK)
         self.LayoutChanged(res.GROUP_TRACEBACK)
-        self.HideElement(res.GROUP_TRACEBACK, True)
+        self.MenuInitString(res.MENU_VIEW_TRACEBACK, True, False)
+        self.__traceback_visible = False
+
+    def ToggleTraceback(self):
+        if self.__traceback_visible:
+            self.HideTraceback()
+        else:
+            self.DisplayTraceback()
+
+    def ClearTraceback(self):
+        self.__traceback_data = (None, None)
+        self.HideTraceback()
 
     def __Update(self):
         # Update the title of the dialog
@@ -241,6 +266,11 @@ class ScriptEditor(c4d.gui.GeDialog):
 
     def CreateLayout(self):
         HV_SCALEFIT = c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT
+
+        self.MenuSubBegin(res['MENU_VIEW'])
+        self.MenuAddString(*res('MENU_VIEW_TRACEBACK'))
+        self.MenuSubEnd()
+        self.MenuFinished()
 
         # Build the menu line with the "Send" button. The
         # respective LayoutCallbacks are invoked.
@@ -300,6 +330,7 @@ class ScriptEditor(c4d.gui.GeDialog):
         if id_ == res.BUTTON_SEND and self.__script:
             code = self.GetString(res.TEXT_SCRIPT)
             self.AddUndo(code)
+            self.ClearTraceback()
             self.__script.code_submit(self, code)
             self.__Update()
         elif id_ == res.BUTTON_CLOSE_TRACEBACK:
@@ -314,6 +345,8 @@ class ScriptEditor(c4d.gui.GeDialog):
             if undos.forward():
                 self.SetString(res.TEXT_SCRIPT, undos.data)
             self.__Update()
+        elif id_ == res.MENU_VIEW_TRACEBACK:
+            self.ToggleTraceback()
         return True
 
 class TracebackModel(c4d.gui.TreeViewFunctions):
