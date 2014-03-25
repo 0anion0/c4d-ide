@@ -194,25 +194,26 @@ class ScriptEditor(c4d.gui.GeDialog):
 
         # Add a close button to the top right.
         self.GroupBegin(0, c4d.BFH_SCALEFIT, 0, 0)
-        self.GroupBorderSpace(4, 0, 4, 0)
+        self.GroupBorderSpace(4, 4, 4, 4)
 
         message = str(exc) if exc else res['IDC_NO_TRACEBACK']
-        self.AddStaticText(0, c4d.BFH_SCALEFIT, name=str(exc))
+        self.AddStaticText(0, c4d.BFH_SCALEFIT, name=message)
         self.AddBitmapButton(
                     res.BUTTON_CLOSE_TRACEBACK, 0,
                     iconid1=c4d.RESOURCEIMAGE_CLEARSELECTION)
         self.GroupEnd()
 
         # Add the TreeViewCustomGui and the TracebackModel.
-        bc = c4d.BaseContainer()
-        bc.SetBool(c4d.TREEVIEW_ALTERNATE_BG, True)
-        bc.SetBool(c4d.TREEVIEW_NOENTERRENAME, True)
-        bc.SetBool(c4d.TREEVIEW_NO_MULTISELECT, True)
-        bc.SetBool(c4d.TREEVIEW_FIXED_LAYOUT, True)
-        tree = self.AddCustomGui(
-                    res.TREE_TRACEBACK, c4d.CUSTOMGUI_TREEVIEW, "",
-                    c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT, 200, 80, bc)
-        tree.SetRoot(traceback, TracebackModel(), (exc, ref(self)))
+        if exc:
+            bc = c4d.BaseContainer()
+            bc.SetBool(c4d.TREEVIEW_ALTERNATE_BG, True)
+            bc.SetBool(c4d.TREEVIEW_NOENTERRENAME, True)
+            bc.SetBool(c4d.TREEVIEW_NO_MULTISELECT, True)
+            bc.SetBool(c4d.TREEVIEW_FIXED_LAYOUT, True)
+            tree = self.AddCustomGui(
+                        res.TREE_TRACEBACK, c4d.CUSTOMGUI_TREEVIEW, "",
+                        c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT, 200, 80, bc)
+            tree.SetRoot(traceback, TracebackModel(), (exc, ref(self)))
 
         self.LayoutCallback(self.TRACEBACKGROUP_END, (exc, traceback))
         self.LayoutChanged(res.GROUP_TRACEBACK)
