@@ -480,8 +480,17 @@ class DefaultScript(ScriptInterface):
     # ScriptInterface
 
     def code_submit(self, dialog, code):
+        # Create the context in which the script should be
+        # executed int.
+        doc = c4d.documents.GetActiveDocument()
+        scope = {
+            '__name__': '__main__',
+            'doc': doc,
+            'op': doc.GetActiveObject(),
+        }
+
         try:
-            exec code in {}
+            exec code in scope
         except Exception as exc:
             self.last_message = str(exc)
 
