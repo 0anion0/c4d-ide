@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import os
 import sys
 import c4d
 import time
@@ -267,9 +268,15 @@ class ScriptEditor(c4d.gui.GeDialog):
     def CreateLayout(self):
         HV_SCALEFIT = c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT
 
+        self.MenuSubBegin(res['MENU_FILE'])
+        self.MenuAddString(*res('MENU_FILE_OPEN'))
+        self.MenuAddString(*res('MENU_FILE_SAVETO'))
+        self.MenuSubEnd()
+
         self.MenuSubBegin(res['MENU_VIEW'])
         self.MenuAddString(*res('MENU_VIEW_TRACEBACK'))
         self.MenuSubEnd()
+
         self.MenuFinished()
 
         # Build the menu line with the "Send" button. The
@@ -345,6 +352,18 @@ class ScriptEditor(c4d.gui.GeDialog):
             if undos.forward():
                 self.SetString(res.TEXT_SCRIPT, undos.data)
             self.__Update()
+        elif id_ == res.MENU_FILE_OPEN:
+            filename = c4d.storage.LoadDialog()
+            if filename and os.path.isfile(filename):
+                self.AddUndo()
+                with open(filename) as fp:
+                    code = fp.read()
+                self.SetString(res.TEXT_SCRIPT, code)
+        elif id_ == res.MENU_FILE_SAVETO:
+            filename = c4d.storage.SaveDialog()
+            if filename:
+                with open(filename, 'w') as fp:
+                    fp.write(self.GetString(res.TEXT_SCRIPT))
         elif id_ == res.MENU_VIEW_TRACEBACK:
             self.ToggleTraceback()
         return True

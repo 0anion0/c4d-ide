@@ -47,7 +47,7 @@ __version__ = c4dprototyping.__version__
 with open(os.path.join(RESOURCE_PATH, 'symbols.json')) as fp:
     res_class = type('res', (), json.load(fp))
 res_class.__getitem__ = lambda s, n: __res__.LoadString(getattr(s, n))
-res_class.__call__ = lambda s, n: (getattr(s, n), s[n])
+res_class.__call__ = lambda s, n, add='': (getattr(s, n), s[n] + add)
 res_class.instance = __res__
 res_class.file = lambda s, *p: os.path.join(RESOURCE_PATH, *p)
 res = res_class()

@@ -3,6 +3,10 @@ STRINGTABLE {
     BUTTON_REDO "Redo";
     BUTTON_SEND_TOOLTIP "Submit Code";
 
+    MENU_FILE "File";
+    MENU_FILE_OPEN "Open ...";
+    MENU_FILE_SAVETO "Save To ...";
+
     MENU_VIEW "View";
     MENU_VIEW_TRACEBACK "Traceback";
 
