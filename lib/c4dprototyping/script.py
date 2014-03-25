@@ -278,6 +278,10 @@ class ScriptEditor(c4d.gui.GeDialog):
         self.MenuAddString(*res('MENU_VIEW_TRACEBACK'))
         self.MenuSubEnd()
 
+        self.MenuSubBegin(res['MENU_HELP'])
+        self.MenuAddString(*res('MENU_HELP_ABOUT'))
+        self.MenuSubEnd()
+
         self.MenuFinished()
 
         # Build the menu line with the "Send" button. The
@@ -367,7 +371,40 @@ class ScriptEditor(c4d.gui.GeDialog):
                     fp.write(self.GetString(res.TEXT_SCRIPT))
         elif id_ == res.MENU_VIEW_TRACEBACK:
             self.ToggleTraceback()
+        elif id_ == res.MENU_HELP_ABOUT:
+            AboutDialog.Display()
         return True
+
+class AboutDialog(c4d.gui.GeDialog):
+    r""" Displays the about dialog for the c4dprototyping plugin. """
+
+    PLUGIN_ID = 1031953
+
+    @staticmethod
+    def Display():
+        r""" Displays the about dialog. """
+
+        if not hasattr(AboutDialog, '_instance'):
+            AboutDialog._instance = AboutDialog()
+        AboutDialog._instance.Open(
+                    c4d.DLG_TYPE_ASYNC_POPUPEDIT, AboutDialog.PLUGIN_ID,
+                    xpos=-2, ypos=-2)
+
+    def CreateLayout(self):
+        self.GroupBegin(0, c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT, 1, 0)
+        self.GroupBorderSpace(4, 4, 4, 4)
+        self.GroupBorderNoTitle(c4d.BORDER_ROUND)
+        self.AddStaticText(0, 0, name=res['ABOUT_LINE1'])
+        self.AddStaticText(0, 0, name=res['ABOUT_LINE2'])
+        self.AddStaticText(0, 0, name=res['ABOUT_LINE3'])
+        self.GroupEnd()
+        return True
+
+    def Message(self, msg, result):
+        if msg.GetId() == c4d.BFM_LOSTFOCUS:
+            self.Close()
+        return super(AboutDialog, self).Message(msg, result)
+
 
 class TracebackModel(c4d.gui.TreeViewFunctions):
     r""" This is a model for the Cinema 4D TreeViewCustomGui which

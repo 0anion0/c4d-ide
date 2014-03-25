@@ -10,6 +10,13 @@ STRINGTABLE {
     MENU_VIEW "View";
     MENU_VIEW_TRACEBACK "Traceback";
 
+    MENU_HELP "Help";
+    MENU_HELP_ABOUT "About ...";
+
+    ABOUT_LINE1 "Developed by Niklas Rosenstein";
+    ABOUT_LINE2 "http://niklasrosenstein.de/";
+    ABOUT_LINE3 "http://github.com/nr-plugins/nr-c4dprototyping";
+
     IDC_SCRIPT_EDITOR "nr Script Editor";
     IDC_SCRIPT_EDITOR_HELP "Open the Script Editor";
     IDC_NO_INTERFACE "Error: No Interface attached!";
