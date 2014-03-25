@@ -58,7 +58,7 @@ c4dprototyping.init(res)
 
 class OpenScriptEditor(c4d.plugins.CommandData):
 
-    PLUGIN_ID = 1031950
+    PLUGIN_ID = ScriptEditor.GLOBAL_PLUGIN_ID
     PLUGIN_NAME = res['IDC_SCRIPT_EDITOR']
     PLUGIN_HELP = res['IDC_SCRIPT_EDITOR_HELP']
     PLUGIN_INFO = 0
@@ -70,22 +70,14 @@ class OpenScriptEditor(c4d.plugins.CommandData):
                     cls.PLUGIN_ID, cls.PLUGIN_NAME, cls.PLUGIN_INFO,
                     cls.PLUGIN_ICON, cls.PLUGIN_HELP, cls())
 
-    @property
-    def dialog(self):
-        dlg = ScriptEditor.global_instance()
-        dlg.AttachScript(DefaultScript.global_instance())
-        return dlg
-
     # c4d.plugins.CommandData
 
     def Execute(self, doc):
-        return self.dialog.Open(c4d.DLG_TYPE_ASYNC, self.PLUGIN_ID,
-                    defaultw=200, defaulth=80)
+        return ScriptEditor.OpenDefault()
 
     def RestoreLayout(self, secret):
-        return self.dialog.Restore(self.PLUGIN_ID, secret)
+        return ScriptEditor.RestoreDefault(secret)
 
 if __name__ == '__main__':
     OpenScriptEditor.Register()
-
 

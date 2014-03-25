@@ -21,12 +21,14 @@
 class UndoTree(object):
     r""" This class implements a branched undo-system. """
 
-    def __init__(self, init_data, max_steps):
+    def __init__(self, init_data, max_steps, branched=True):
         super(UndoTree, self).__init__()
         self.__age = 0
         self.__root = Root()
         self.__focus = self.__root
         self.__max_steps = max_steps
+        self.__branched = branched
+        self.__reverted_nodes = []
         self.new(init_data)
 
     def new(self, data):
@@ -38,8 +40,43 @@ class UndoTree(object):
 
         if data != self.__focus.data:
             self.__age += 1
-            self.__focus = self.__focus.split(self.__age, data)
+            self.__focus = self.__focus.split(self.__age, data, self.__branched)
             self.__clean()
+            self.break_forward()
+
+    def revert(self):
+        r""" Reverts to the previous step, returns True if
+        successful, False if not. """
+
+        if self.__focus.parent:
+            self.__reverted_nodes.append(self.__focus)
+            self.focus = self.__focus.parent
+            return True
+        return False
+
+    def forward(self):
+        r""" Forwards to the next undo-step. Returns True on success,
+        False if the focus node is the current one. The UndoTree keeps
+        a list of previously revertedundos to continue on the branch
+        as before. """
+
+        if self.__reverted_nodes:
+            self.__focus = self.__reverted_nodes.pop()
+            return True
+        return False
+
+    def can_revert(self):
+        return bool(self.__focus.parent)
+
+    def can_forward(self):
+        return bool(self.__reverted_nodes)
+
+    def break_forward(self):
+        r""" Call this method when data is being changed but no
+        undo step has yet been added. This will break the forward
+        capability. """
+
+        self.__reverted_nodes = []
 
     def __clean(self):
         min_index = self.__age - self.__max_steps
@@ -79,6 +116,12 @@ class UndoTree(object):
 
         return self.__root
 
+    @property
+    def data(self):
+        r""" Returns the data of the current undo-step. """
+
+        return self.__focus.data
+
 class Node(object):
     r""" An undo-step node. Each node has a number assigned, which
     represents the index of the undo-step, and the actual data which
@@ -94,14 +137,17 @@ class Node(object):
     def __repr__(self):
         return '<Node:%d with %r>' % (self.index, self.data)
 
-    def split(self, new_index, data):
+    def split(self, new_index, data, branched):
         r""" Creates a new undo-step from this Node with the new
         *data* if and index. Returns the created node. """
 
         assert new_index > self.index
 
         new = Node(new_index, data, self)
-        self.children.append(new)
+        if branched:
+            self.children.append(new)
+        else:
+            self.children = [new]
         return new
 
     def clean(self, min_index):

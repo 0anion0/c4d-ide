@@ -1,4 +1,6 @@
 STRINGTABLE {
+    BUTTON_UNDO "Undo";
+    BUTTON_REDO "Redo";
     BUTTON_SEND_TOOLTIP "Submit Code";
     IDC_SCRIPT_EDITOR "Script Editor";
     IDC_SCRIPT_EDITOR_HELP "Open the Script Editor";

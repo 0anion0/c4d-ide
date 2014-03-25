@@ -42,6 +42,8 @@ class ScriptEditor(c4d.gui.GeDialog):
     - ``display_tracebacks``
     """
 
+    GLOBAL_PLUGIN_ID = 1031950
+
     MENULINE_START = 1000
     MENULINE_BEFORESEND = 1001
     MENULINE_END = 1002
@@ -60,6 +62,33 @@ class ScriptEditor(c4d.gui.GeDialog):
         if not hasattr(ScriptEditor, '_instance'):
             ScriptEditor._instance = ScriptEditor()
         return ScriptEditor._instance
+
+    @staticmethod
+    def OpenWithScript(script):
+        r""" Opens the global ScriptEditor instance with the specified
+        :class:`ScriptInterface` object. """
+
+        dlg = ScriptEditor.global_instance()
+        dlg.AttachScript(script)
+        return dlg.Open(c4d.DLG_TYPE_ASYNC, ScriptEditor.GLOBAL_PLUGIN_ID)
+
+    @staticmethod
+    def OpenDefault():
+        r""" Opens the ScriptEditor with the :class:`DefaultScript`
+        attached. """
+
+        dlg = ScriptEditor.global_instance()
+        dlg.AttachScript(DefaultScript.global_instance())
+        return dlg.Open(c4d.DLG_TYPE_ASYNC, ScriptEditor.GLOBAL_PLUGIN_ID)
+
+    @staticmethod
+    def RestoreDefault(secret):
+        r""" Restores the ScriptEditor in the interface. """
+
+        dlg = ScriptEditor.global_instance()
+        dlg.AttachScript(DefaultScript.global_instance())
+        return dlg.Restore(ScriptEditor.GLOBAL_PLUGIN_ID, secret)
+
 
     def __init__(self, title=None, **options):
         super(ScriptEditor, self).__init__()
@@ -115,6 +144,7 @@ class ScriptEditor(c4d.gui.GeDialog):
 
         self.__script.add_undo(code)
         self.__last_undo = time.time()
+        self.__Update()
 
     def AddBitmapButton(self, id_, flags, minw=0, minh=0, button=True,
                 iconid1=None, iconid2=None, tooltip=None):
@@ -183,12 +213,9 @@ class ScriptEditor(c4d.gui.GeDialog):
         self.HideElement(res.GROUP_TRACEBACK, True)
 
     def __Update(self):
-        if not self.__script:
-            self.__script = DefaultScript.global_instance()
-
         # Update the title of the dialog
         title = str(self.title)
-        name = self.__script.get_name()
+        name = self.__script.get_name() if self.__script else None
         if name:
             title += ' - %s' % name
         self.SetTitle(title)
@@ -198,6 +225,10 @@ class ScriptEditor(c4d.gui.GeDialog):
             message = self.__script.get_status_string()
             self.SetString(res.STATIC_STATUS, message or '')
             self.LayoutChanged(res.STATIC_STATUS)
+
+        if self.__script:
+            self.Enable(res.BUTTON_UNDO, self.__script.undos.can_revert())
+            self.Enable(res.BUTTON_REDO, self.__script.undos.can_forward())
 
     # c4d.gui.GeDialog
 
@@ -219,6 +250,10 @@ class ScriptEditor(c4d.gui.GeDialog):
         # Should we also display a status line in the menuline?
         if self.options['status_line']:
             self.AddStaticText(res.STATIC_STATUS, 0)
+            self.AddStaticText(0, 0, name=" ") # separator
+
+        self.AddButton(res.BUTTON_UNDO, 0, name=res['BUTTON_UNDO'])
+        self.AddButton(res.BUTTON_REDO, 0, name=res['BUTTON_REDO'])
 
         # Create the "Send" BitmapButton.
         self.LayoutCallback(self.MENULINE_BEFORESEND)
@@ -262,13 +297,23 @@ class ScriptEditor(c4d.gui.GeDialog):
         return True
 
     def Command(self, id_, msg):
-        if id_ == res.BUTTON_SEND:
+        if id_ == res.BUTTON_SEND and self.__script:
             code = self.GetString(res.TEXT_SCRIPT)
             self.AddUndo(code)
             self.__script.code_submit(self, code)
             self.__Update()
         elif id_ == res.BUTTON_CLOSE_TRACEBACK:
             self.HideTraceback()
+        elif id_ == res.BUTTON_UNDO and self.__script:
+            undos = self.__script.undos
+            if undos.revert():
+                self.SetString(res.TEXT_SCRIPT, undos.data)
+            self.__Update()
+        elif id_ == res.BUTTON_REDO and self.__script:
+            undos = self.__script.undos
+            if undos.forward():
+                self.SetString(res.TEXT_SCRIPT, undos.data)
+            self.__Update()
         return True
 
 class TracebackModel(c4d.gui.TreeViewFunctions):
@@ -333,7 +378,7 @@ class ScriptInterface(object):
 
     def __init__(self, init_code=''):
         super(ScriptInterface, self).__init__()
-        self.undos = undotree.UndoTree(init_data=init_code, max_steps=30)
+        self.undos = undotree.UndoTree(init_code, 30, branched=False)
 
     def add_undo(self, code):
         r""" This method is called with the current code in the
