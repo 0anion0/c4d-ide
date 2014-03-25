@@ -1,0 +1,7 @@
+STRINGTABLE {
+    BUTTON_SEND_TOOLTIP "Submit Code";
+    IDC_SCRIPT_EDITOR "Script Editor";
+    IDC_SCRIPT_EDITOR_HELP "Open the Script Editor";
+    IDC_NO_INTERFACE "Error: No Interface attached!";
+    IDC_CODE_OK "No Exceptions";
+}
