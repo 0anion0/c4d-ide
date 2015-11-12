@@ -24,8 +24,8 @@ import c4d
 import time
 
 from weakref import ref
-from c4dprototyping import res, undotree, utils
-from c4dprototyping.utils import xor
+from . import res, undotree, utils
+from .utils import xor
 
 class ScriptEditor(c4d.gui.GeDialog):
     r""" This class implements a Script Editor which can be used
@@ -81,7 +81,8 @@ class ScriptEditor(c4d.gui.GeDialog):
 
         dlg = ScriptEditor.global_instance()
         dlg.AttachScript(DefaultScript.global_instance())
-        return dlg.Open(c4d.DLG_TYPE_ASYNC, ScriptEditor.GLOBAL_PLUGIN_ID)
+        return dlg.Open(c4d.DLG_TYPE_ASYNC, ScriptEditor.GLOBAL_PLUGIN_ID,
+            defaultw=500, defaulth=300)
 
     @staticmethod
     def RestoreDefault(secret):
@@ -99,7 +100,7 @@ class ScriptEditor(c4d.gui.GeDialog):
         self.__traceback_data = (None, None)
         self.__traceback_visible = False
 
-        self.title = title or res['IDC_SCRIPT_EDITOR']
+        self.title = title or res.string('IDC_SCRIPT_EDITOR')
         self.options = {
                 'status_bar': True,
                 'highlight_line': True,
@@ -196,7 +197,7 @@ class ScriptEditor(c4d.gui.GeDialog):
         self.GroupBegin(0, c4d.BFH_SCALEFIT, 0, 0)
         self.GroupBorderSpace(4, 4, 4, 4)
 
-        message = str(exc) if exc else res['IDC_NO_TRACEBACK']
+        message = str(exc) if exc else res.string('IDC_NO_TRACEBACK')
         self.AddStaticText(0, c4d.BFH_SCALEFIT, name=message)
         self.AddBitmapButton(
                     res.BUTTON_CLOSE_TRACEBACK, 0,
@@ -269,17 +270,17 @@ class ScriptEditor(c4d.gui.GeDialog):
     def CreateLayout(self):
         HV_SCALEFIT = c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT
 
-        self.MenuSubBegin(res['MENU_FILE'])
-        self.MenuAddString(*res('MENU_FILE_OPEN'))
-        self.MenuAddString(*res('MENU_FILE_SAVETO'))
+        self.MenuSubBegin(res.string('MENU_FILE'))
+        self.MenuAddString(*res.tup('MENU_FILE_OPEN'))
+        self.MenuAddString(*res.tup('MENU_FILE_SAVETO'))
         self.MenuSubEnd()
 
-        self.MenuSubBegin(res['MENU_VIEW'])
-        self.MenuAddString(*res('MENU_VIEW_TRACEBACK'))
+        self.MenuSubBegin(res.string('MENU_VIEW'))
+        self.MenuAddString(*res.tup('MENU_VIEW_TRACEBACK'))
         self.MenuSubEnd()
 
-        self.MenuSubBegin(res['MENU_HELP'])
-        self.MenuAddString(*res('MENU_HELP_ABOUT'))
+        self.MenuSubBegin(res.string('MENU_HELP'))
+        self.MenuAddString(*res.tup('MENU_HELP_ABOUT'))
         self.MenuSubEnd()
 
         self.MenuFinished()
@@ -294,15 +295,15 @@ class ScriptEditor(c4d.gui.GeDialog):
             self.AddStaticText(res.STATIC_STATUS, 0)
             self.AddStaticText(0, 0, name=" ") # separator
 
-        self.AddButton(res.BUTTON_UNDO, 0, name=res['BUTTON_UNDO'])
-        self.AddButton(res.BUTTON_REDO, 0, name=res['BUTTON_REDO'])
+        self.AddButton(res.BUTTON_UNDO, 0, name=res.string('BUTTON_UNDO'))
+        self.AddButton(res.BUTTON_REDO, 0, name=res.string('BUTTON_REDO'))
 
         # Create the "Send" BitmapButton.
         self.LayoutCallback(self.MENULINE_BEFORESEND)
         self.AddBitmapButton(
                 res.BUTTON_SEND, 0, 16, 16,
                 iconid1=self.options['send_icon'],
-                tooltip=res['BUTTON_SEND_TOOLTIP'])
+                tooltip=res.string('BUTTON_SEND_TOOLTIP'))
 
         # Send the LayoutCallback for the end of the menuline
         # group and close it.
@@ -394,9 +395,9 @@ class AboutDialog(c4d.gui.GeDialog):
         self.GroupBegin(0, c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT, 1, 0)
         self.GroupBorderSpace(4, 4, 4, 4)
         self.GroupBorderNoTitle(c4d.BORDER_ROUND)
-        self.AddStaticText(0, 0, name=res['ABOUT_LINE1'])
-        self.AddStaticText(0, 0, name=res['ABOUT_LINE2'])
-        self.AddStaticText(0, 0, name=res['ABOUT_LINE3'])
+        self.AddStaticText(0, 0, name=res.string('ABOUT_LINE1'))
+        self.AddStaticText(0, 0, name=res.string('ABOUT_LINE2'))
+        self.AddStaticText(0, 0, name=res.string('ABOUT_LINE3'))
         self.GroupEnd()
         return True
 
@@ -542,8 +543,8 @@ class DefaultScript(ScriptInterface):
             dialog.SetScriptCursor(utils.get_last_traceback().tb_lineno, 0)
             dialog.DisplayTraceback(exc, tb)
         else:
-            self.last_message = res['IDC_CODE_OK']
+            self.last_message = res.string('IDC_CODE_OK')
 
     def get_status_string(self):
-        return self.last_message or res['IDC_CODE_OK']
+        return self.last_message or res.string('IDC_CODE_OK')
 

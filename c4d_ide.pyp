@@ -18,6 +18,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-symbols:
-	python -m c4ddev symbols --format json --description > res/symbols.json
+import os
+import sys
+import c4d
+import json
 
+PROJECT_PATH  = os.path.dirname(__file__)
+RESOURCE_PATH = os.path.join(PROJECT_PATH, 'res')
+DEVEL_PATH  = os.path.join(PROJECT_PATH, 'devel')
+
+if DEVEL_PATH not in sys.path:
+    sys.path.append(DEVEL_PATH)
+
+# Remove all occurences of the nr.c4d_ide package in the module
+# cache to fully reload it.
+for key in sys.modules.keys():
+    if key == 'nr.c4d_ide' or key.startswith('nr.c4d_ide.'):
+        del sys.modules[key]
+
+import nr.c4d_ide
+
+def PluginMessage(id, msg):
+    if id in [c4d.C4DPL_END, c4d.C4DPL_RELOADPYTHONPLUGINS]:
+        nr.c4d_ide.plugin_end()
+    return nr.c4d_ide.plugin_message(id, msg)
+
+nr.c4d_ide.plugin_start()

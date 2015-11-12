@@ -1,7 +1,7 @@
 STRINGTABLE {
     BUTTON_UNDO "Undo";
     BUTTON_REDO "Redo";
-    BUTTON_SEND_TOOLTIP "Submit Code";
+    BUTTON_SEND_TOOLTIP "Execute";
 
     MENU_FILE "File";
     MENU_FILE_OPEN "Open ...";
@@ -15,10 +15,10 @@ STRINGTABLE {
 
     ABOUT_LINE1 "Developed by Niklas Rosenstein";
     ABOUT_LINE2 "http://niklasrosenstein.de/";
-    ABOUT_LINE3 "http://github.com/nr-plugins/nr-c4dprototyping";
+    ABOUT_LINE3 "http://github.com/nr-plugins/c4d-ide";
 
-    IDC_SCRIPT_EDITOR "nr Script Editor";
-    IDC_SCRIPT_EDITOR_HELP "Open the Script Editor";
+    IDC_SCRIPT_EDITOR "Python IDE";
+    IDC_SCRIPT_EDITOR_HELP "Open the Cinema 4D Python IDE.";
     IDC_NO_INTERFACE "Error: No Interface attached!";
     IDC_CODE_OK "No Exceptions";
     IDC_NO_TRACEBACK "No Traceback";

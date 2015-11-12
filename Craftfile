@@ -1,0 +1,7 @@
+# craftr_module(nr.c4d_ide)
+
+append_search_path('..')
+load_module('maxon.c4d.python')
+
+def symbols():
+  maxon.c4d.python.symbols_format(project_dir, local('devel/nr/c4d_ide/res.py'), fmt='file')

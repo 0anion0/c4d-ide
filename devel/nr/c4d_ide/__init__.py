@@ -1,4 +1,4 @@
-# Copyright (c) 2014  Niklas Rosenstein
+# Copyright (c) 2015  Niklas Rosenstein
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -17,31 +17,29 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+'''
+nr.c4d_ide
+==========
 
-from c4dprototyping.proxy import DelayedBinding as _DelayedBinding
+This package contains the Cinema 4D IDE plugin and all its classes.
+Contents of this package can be used to extend the plugin and to have
+access to the underlying data and functions.
+'''
 
-__author__  = 'Niklas Rosenstein <rosensteinniklas@gmail.com>'
-__version__ = (0, 0, 1)
+__author__  = 'Niklas Rosenstein <rosensteinniklas(at)gmail.com>'
+__version__ = '1.0.0-dev'
 
-res = _DelayedBinding()
+from . import res
+from . import plugins
 
-def init(resource):
-    r""" Called from ``nr-prototyping.pyp`` to initialize the module
-    with the loaded resource symbols. GUI operations may only be
-    invoked after this function was called.
 
-    It also creates the global instances of the :class:`ScriptEditor`
-    and :class:`ScriptExecutor`. """
+def plugin_start():
+  plugins.OpenScriptEditor.Register()
 
-    global res
-    if type(res) != _DelayedBinding:
-        raise RuntimeError('already initialized')
 
-    # Bind the proxy for all that imported the resource
-    # before initializing.
-    res._bind(resource)
+def plugin_end():
+  pass
 
-    # Make the original object available to those that want
-    # to import it after initializing.
-    res = resource
 
+def plugin_message(id, msg):
+  pass
