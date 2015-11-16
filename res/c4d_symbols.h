@@ -33,6 +33,13 @@ enum {
     IDC_SCRIPT_EDITOR_HELP,
     IDC_CODE_OK,
     IDC_NO_TRACEBACK,
+
+    // Editor Window IDs
+    IDS_EDITOR,
+    IDS_EDITOR_HELP,
+    IDS_EDITOR_TABS,
+    IDS_EDITOR_CODE,
+    IDC_EDITOR_ASKCLOSE,
 };
 
 #endif /* C4D_SYMBOLS */

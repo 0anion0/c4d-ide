@@ -37,10 +37,35 @@ for key in sys.modules.keys():
         del sys.modules[key]
 
 import nr.c4d_ide
+from nr.c4d_ide import res
 
-def PluginMessage(id, msg):
-    if id in [c4d.C4DPL_END, c4d.C4DPL_RELOADPYTHONPLUGINS]:
-        nr.c4d_ide.plugin_end()
-    return nr.c4d_ide.plugin_message(id, msg)
 
-nr.c4d_ide.plugin_start()
+class OpenEditorWindow(c4d.plugins.CommandData):
+
+  PLUGIN_ID = 1031950
+  PLUGIN_NAME = res.string('IDS_EDITOR')
+  PLUGIN_HELP = res.string('IDS_EDITOR_HELP')
+  PLUGIN_INFO = 0
+  PLUGIN_ICON = res.bitmap('img', 'editor.png')
+
+  @classmethod
+  def Register(cls):
+    return c4d.plugins.RegisterCommandPlugin(
+      cls.PLUGIN_ID, cls.PLUGIN_NAME, cls.PLUGIN_INFO,
+      cls.PLUGIN_ICON, cls.PLUGIN_HELP, cls())
+
+  # c4d.plugins.CommandData
+
+  def Execute(self, doc):
+    return nr.c4d_ide.main_window.Open(c4d.DLG_TYPE_ASYNC, self.PLUGIN_ID, 0)
+
+  def RestoreLayout(self, secret):
+    return nr.c4d_ide.main_window.Restore(self.PLUGIN_ID, secret)
+
+
+def PluginStart():
+  OpenEditorWindow.Register()
+
+
+if __name__ == "__main__":
+  PluginStart()

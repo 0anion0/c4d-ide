@@ -22,4 +22,11 @@ STRINGTABLE {
     IDC_NO_INTERFACE "Error: No Interface attached!";
     IDC_CODE_OK "No Exceptions";
     IDC_NO_TRACEBACK "No Traceback";
+
+    // Editor Window IDs
+    IDS_EDITOR "Python IDE";
+    IDS_EDITOR_HELP "Open the Python IDE Editor Window.";
+    IDS_EDITOR_TABS "";
+    IDS_EDITOR_CODE "";
+    IDC_EDITOR_ASKCLOSE "This document has unsaved changes. Do you want to save them now?";
 }
